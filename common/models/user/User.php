@@ -1,6 +1,9 @@
 <?php
-namespace common\models;
 
+namespace common\models\user;
+
+use common\models\user\billing\PaymentAccount;
+use common\models\user\Query\UserQuery;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
@@ -12,18 +15,99 @@ use yii\web\IdentityInterface;
  *
  * @property integer $id
  * @property string $username
- * @property string $password_hash
- * @property string $password_reset_token
  * @property string $verification_token
  * @property string $email
  * @property string $auth_key
  * @property integer $status
  * @property integer $created_at
  * @property integer $updated_at
- * @property string $password write-only password
+ * @property int $vk_id [int(11)]
+ * @property PaymentAccount $paymentAccount
  */
 class User extends ActiveRecord implements IdentityInterface
 {
+    public static function find()
+    {
+        return new UserQuery(get_called_class());
+    }
+
+    /**
+     * @return int
+     */
+    public function getVkId(): int
+    {
+        return $this->vk_id;
+    }
+
+    /**
+     * @param int $vk_id
+     * @return User
+     */
+    public function setVkId(int $vk_id): User
+    {
+        $this->vk_id = $vk_id;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUsername(): string
+    {
+        return $this->username;
+    }
+
+    /**
+     * @param string $username
+     * @return User
+     */
+    public function setUsername(string $username): User
+    {
+        $this->username = $username;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
+
+    /**
+     * @param string $email
+     * @return User
+     */
+    public function setEmail(string $email): User
+    {
+        $this->email = $email;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getStatus(): int
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param int $status
+     * @return User
+     */
+    public function setStatus(int $status): User
+    {
+        $this->status = $status;
+        return $this;
+    }
+
+    public function getVkUrl(): string
+    {
+        return 'https://vk.com/id' . $this->getVkId();
+    }
+
     const STATUS_DELETED = 0;
     const STATUS_INACTIVE = 9;
     const STATUS_ACTIVE = 10;
@@ -158,27 +242,6 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Validates password
-     *
-     * @param string $password password to validate
-     * @return bool if password provided is valid for current user
-     */
-    public function validatePassword($password)
-    {
-        return Yii::$app->security->validatePassword($password, $this->password_hash);
-    }
-
-    /**
-     * Generates password hash from password and sets it to the model
-     *
-     * @param string $password
-     */
-    public function setPassword($password)
-    {
-        $this->password_hash = Yii::$app->security->generatePasswordHash($password);
-    }
-
-    /**
      * Generates "remember me" authentication key
      */
     public function generateAuthKey()
@@ -186,24 +249,14 @@ class User extends ActiveRecord implements IdentityInterface
         $this->auth_key = Yii::$app->security->generateRandomString();
     }
 
-    /**
-     * Generates new password reset token
-     */
-    public function generatePasswordResetToken()
-    {
-        $this->password_reset_token = Yii::$app->security->generateRandomString() . '_' . time();
-    }
 
     public function generateEmailVerificationToken()
     {
         $this->verification_token = Yii::$app->security->generateRandomString() . '_' . time();
     }
 
-    /**
-     * Removes password reset token
-     */
-    public function removePasswordResetToken()
+    public function getPaymentAccount()
     {
-        $this->password_reset_token = null;
+        return $this->hasOne(PaymentAccount::class, ['user_id' => 'id']);
     }
 }

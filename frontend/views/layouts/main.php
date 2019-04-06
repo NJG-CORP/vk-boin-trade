@@ -1,14 +1,16 @@
 <?php
 
 /* @var $this \yii\web\View */
+
 /* @var $content string */
 
-use yii\helpers\Html;
+use common\components\user\auth\VkService;
+use common\widgets\Alert;
+use frontend\assets\AppAsset;
 use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
+use yii\helpers\Html;
 use yii\widgets\Breadcrumbs;
-use frontend\assets\AppAsset;
-use common\widgets\Alert;
 
 AppAsset::register($this);
 ?>
@@ -41,13 +43,15 @@ AppAsset::register($this);
         ['label' => 'Contact', 'url' => ['/site/contact']],
     ];
     if (Yii::$app->user->isGuest) {
-        $menuItems[] = ['label' => 'Signup', 'url' => ['/site/signup']];
-        $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
+        $menuItems[] = ['label' => 'Login', 'url' => (new VkService())->getAuthUrl()];
     } else {
+        $menuItems[] = ['label' => Yii::$app->user->identity->getUsername() . ' ' . $this->render('_balance_label', [
+                'account' => Yii::$app->user->identity->paymentAccount
+            ]), 'encode' => false];
         $menuItems[] = '<li>'
             . Html::beginForm(['/site/logout'], 'post')
             . Html::submitButton(
-                'Logout (' . Yii::$app->user->identity->username . ')',
+                'Выйти',
                 ['class' => 'btn btn-link logout']
             )
             . Html::endForm()
@@ -78,6 +82,9 @@ AppAsset::register($this);
 </footer>
 
 <?php $this->endBody() ?>
+<script>
+    $('.show-tooltip').tooltip();
+</script>
 </body>
 </html>
 <?php $this->endPage() ?>

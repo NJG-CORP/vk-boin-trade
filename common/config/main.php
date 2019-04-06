@@ -9,5 +9,15 @@ return [
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
+        'formatter' => [
+            'timeZone' => 'UTC',
+            'dateFormat' => 'dd.MM.Y',
+            'timeFormat' => 'HH:mm:ss',
+            'datetimeFormat' => 'dd.MM.Y HH:mm',
+            'decimalSeparator' => '.',
+            'thousandSeparator' => ' ',
+            'nullDisplay' => '-',
+            'currencyCode' => '₴'   // <-- ---- ----
+        ]
     ],
 ];
