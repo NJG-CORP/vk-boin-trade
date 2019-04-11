@@ -12,14 +12,15 @@ class MainController extends Controller
 {
     public function actionIndex(int $from, int $to)
     {
-        $provider = (new OffersManager())->getProvider($from, $to);
+        $provider = OffersManager::getProvider($from, $to);
 
         if (!$provider) {
             throw new NotFoundHttpException();
         }
 
         return $this->render('index', [
-            'provider' => $provider
+            'provider' => $provider,
+            'mediumPrice' => \Yii::$app->formatter->asDecimal(OffersManager::getMediumPrice($from, $to)),
         ]);
     }
 }

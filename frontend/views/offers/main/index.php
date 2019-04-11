@@ -1,10 +1,9 @@
 <?php
 /**
  * @var \common\models\offers\OffersProvider $provider
- * @var float $mediumPrice
+ * @var string $mediumPrice
+ * @var \yii\db\ActiveRecord $searchModel
  */
-
-$mediumPrice = 1.22;
 
 $model = $provider->getModels()[0];
 /** @var \common\models\offers\Offers $model */
@@ -15,6 +14,11 @@ $toLabel = $model->toCurrency->getLabel();
 try {
     echo \yii\grid\GridView::widget([
         'dataProvider' => $provider,
+        'rowOptions' => function ($model) {
+            return [
+                'id' => 'row-offer-id-' . $model->getId()
+            ];
+        },
         'columns' => [
             [
                 'label' => '#',
@@ -30,7 +34,7 @@ try {
             ],
             [
                 'label' => 'Предложение (' . $fromLabel . ')',
-                'attribute' => 'from_currency_value',
+                'attribute' => 'from_value',
                 'value' => function ($model) {
                     /** @var \common\models\offers\Offers $model */
                     return $model->getFromValue();
@@ -38,7 +42,7 @@ try {
             ],
             [
                 'label' => 'Спрос (' . $toLabel . ')',
-                'attribute' => 'from_currency_value',
+                'attribute' => 'to_value',
                 'value' => function ($model) {
                     /** @var \common\models\offers\Offers $model */
                     return $model->getToValue();
@@ -46,17 +50,32 @@ try {
             ],
             [
                 'label' => $mediumLabel,
+                'attribute' => 'price',
                 'value' => function ($model) use ($mediumPrice) {
                     /** @var \common\models\offers\Offers $model */
                     $price = $model->getToValue() / $model->getFromValue();
-                    return '<span class="price ' . ($price > $mediumPrice ? 'bad-price' : 'good-price') . '">' . Yii::$app->formatter->asDecimal($price)
+                    return '<span class="price ' . ($price > $mediumPrice ? 'bad-price' : 'good-price') . '">~' . Yii::$app->formatter->asDecimal($price)
                         . ($price > $mediumPrice ? '<i class="glyphicon glyphicon-arrow-down"></i>' : '<i class="glyphicon glyphicon-arrow-up"></i>')
                         . '</span>
                             <span class="show-tooltip" data-toggle="tooltip" data-placement="top" title="По сравнению со средней ценой (' . $mediumPrice . ')"><i class="glyphicon glyphicon-question-sign"></i></span>';
                 },
                 'format' => 'raw'
             ],
-            'date_created:datetime'
+            'date_created:datetime',
+            [
+                'label' => 'Операции',
+                'content' => function ($model) {
+                    /** @var \common\models\offers\Offers $model */
+                    return $model->getOwnerUserId() === Yii::$app->user->getId() ? '' : \yii\helpers\Html::a('Купить', [
+                        '/offers/manage/buy',
+                        'offerId' => $model->getId()
+                    ], [
+                        'class' => 'ajax-send confirm-first',
+                        'data-offer-id' => $model->getId(),
+                        'data-method' => 'POST'
+                    ]);
+                }
+            ]
         ]
     ]);
 } catch (Exception $e) {

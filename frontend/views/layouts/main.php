@@ -39,8 +39,8 @@ AppAsset::register($this);
     ]);
     $menuItems = [
         ['label' => 'Home', 'url' => ['/site/index']],
-        ['label' => 'About', 'url' => ['/site/about']],
-        ['label' => 'Contact', 'url' => ['/site/contact']],
+        ['label' => 'Купить коины', 'url' => ['/offers/main/index', 'from' => 1, 'to' => 2]],
+        ['label' => 'Продать коины', 'url' => ['/offers/main/index', 'from' => 2, 'to' => 1]],
     ];
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => 'Login', 'url' => (new VkService())->getAuthUrl()];
@@ -82,8 +82,8 @@ AppAsset::register($this);
 </footer>
 
 <?php $this->endBody() ?>
-<script>
-    $('.show-tooltip').tooltip();
+<script src="/js/main.js">
+
 </script>
 </body>
 </html>

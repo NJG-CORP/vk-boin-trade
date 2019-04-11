@@ -7,7 +7,7 @@ use yii\db\ActiveQuery;
 
 class OffersQuery extends ActiveQuery
 {
-    public function filterByIds(int $from, int $to)
+    public function filterByCurrencyIds(int $from, int $to)
     {
         return $this->andWhere([
             'from_currency_id' => $from,
@@ -19,6 +19,13 @@ class OffersQuery extends ActiveQuery
     {
         return $this->andWhere([
             'status' => Offers::STATUS_NEW
+        ]);
+    }
+
+    public function filterById(int $id)
+    {
+        return $this->andWhere([
+            'id' => $id
         ]);
     }
 

@@ -5,6 +5,7 @@ namespace common\models\offers;
 use common\models\offers\Query\OffersQuery;
 use common\models\user\billing\Currency;
 use common\models\user\User;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 
 /**
@@ -16,14 +17,59 @@ use yii\db\ActiveRecord;
  * @property int $date_created [int(11)]
  * @property int $date_updated [int(11)]
  * @property int $date_closed [int(11)]
- * @property bool $status [tinyint(4)]
+ * @property int $status [tinyint(4)]
  * @property int $owner_user_id [int(11)]
  * @property User $owner
  * @property Currency $fromCurrency
  * @property Currency $toCurrency
+ * @property int $buyer_user_id [int(11)]
  */
 class Offers extends ActiveRecord
 {
+    /**
+     * @return int
+     */
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDateClosed(): int
+    {
+        return $this->date_closed;
+    }
+
+    /**
+     * @param int $date_closed
+     * @return Offers
+     */
+    public function setDateClosed(int $date_closed): Offers
+    {
+        $this->date_closed = $date_closed;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getBuyerUserId(): int
+    {
+        return $this->buyer_user_id;
+    }
+
+    /**
+     * @param int $buyer_user_id
+     * @return Offers
+     */
+    public function setBuyerUserId(int $buyer_user_id): Offers
+    {
+        $this->buyer_user_id = $buyer_user_id;
+        return $this;
+    }
+
     public const
         STATUS_NEW = 1,
         STATUS_SUCCESS = 2,
@@ -32,6 +78,17 @@ class Offers extends ActiveRecord
     public static function find()
     {
         return new OffersQuery(get_called_class());
+    }
+
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'createdAtAttribute' => 'date_created',
+                'updatedAtAttribute' => 'date_updated'
+            ]
+        ];
     }
 
     /**
@@ -125,18 +182,18 @@ class Offers extends ActiveRecord
     }
 
     /**
-     * @return bool
+     * @return int
      */
-    public function isStatus(): bool
+    public function getStatus(): int
     {
         return $this->status;
     }
 
     /**
-     * @param bool $status
+     * @param int $status
      * @return Offers
      */
-    public function setStatus(bool $status): Offers
+    public function setStatus(int $status): Offers
     {
         $this->status = $status;
         return $this;

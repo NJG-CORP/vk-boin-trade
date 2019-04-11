@@ -4,7 +4,9 @@
 namespace common\models\user\billing;
 
 
+use common\models\transaction\Transaction;
 use common\models\user\billing\Exception\CouldNotSavePaymentAccountBalanceException;
+use common\models\user\billing\Exception\CurrencyNotFound;
 
 class PaymentAccountBalanceManager
 {
@@ -16,6 +18,46 @@ class PaymentAccountBalanceManager
     public function __construct(int $paymentAccountId)
     {
         $this->paymentAccountId = $paymentAccountId;
+    }
+
+    public function checkAmount(int $currencyId, string $value): bool
+    {
+        $amount = PaymentAccountBalance::find()
+            ->select('value')
+            ->filterByCurrencyId($currencyId)
+            ->filterByPaymentAccountId($this->paymentAccountId)
+            ->scalar();
+
+        return $amount >= $value;
+    }
+
+    public function changeBalance(int $currencyId, string $value, bool $isPositive = true, int $reason, int $objectId)
+    {
+        $balance = PaymentAccountBalance::find()
+            ->filterByPaymentAccountId($this->paymentAccountId)
+            ->filterByCurrencyId($currencyId)
+            ->one();
+
+        if (!$balance) {
+            throw new CurrencyNotFound();
+        }
+
+        $balance->setValue($balance->getValue() + ($isPositive ? $value : -$value));
+
+        if (!$balance->save()) {
+            throw new CouldNotSavePaymentAccountBalanceException($balance->getFirstError());
+        }
+
+        $transaction = new Transaction();
+
+        $transaction
+            ->setValue($value)
+            ->setCurrencyId($currencyId)
+            ->setPaymentAccountId($this->paymentAccountId)
+            ->setReason($reason)
+            ->setObjectId($objectId)
+            ->setType($isPositive ? Transaction::TYPE_INCREASE : Transaction::TYPE_DECREASE)
+            ->save();
     }
 
     /**

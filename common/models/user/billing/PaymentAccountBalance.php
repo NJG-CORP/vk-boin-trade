@@ -4,6 +4,7 @@
 namespace common\models\user\billing;
 
 
+use common\models\user\billing\Query\PaymentAccountBalanceQuery;
 use yii\db\ActiveRecord;
 
 /**
@@ -14,6 +15,12 @@ use yii\db\ActiveRecord;
  */
 class PaymentAccountBalance extends ActiveRecord
 {
+
+    public static function find()
+    {
+        return new PaymentAccountBalanceQuery(get_called_class());
+    }
+
     /**
      * @return int
      */

@@ -9,7 +9,7 @@ $params = array_merge(
 return [
     'id' => 'app-frontend',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'bootstrap' => ['log', 'debug'],
     'controllerNamespace' => 'frontend\controllers',
     'components' => [
         'request' => [
@@ -37,11 +37,19 @@ return [
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
-//        'urlManager' => [
-//            'enablePrettyUrl' => true,
+        'urlManager' => [
+            'enablePrettyUrl' => true,
 //            'showScriptName' => false,
-//            'rules' => [],
-//        ],
+            'rules' => require('routing.php'),
+        ],
+    ],
+    'modules' => [
+        'debug' => [
+            'class' => 'yii\debug\Module',
+            // uncomment and adjust the following to add your IP if you are not connecting from localhost.
+            //'allowedIPs' => ['127.0.0.1', '::1'],
+            'allowedIPs' => ['185.17.128.254']
+        ],
     ],
     'params' => $params,
 ];
