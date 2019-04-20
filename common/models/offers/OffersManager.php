@@ -3,7 +3,7 @@
 namespace common\models\offers;
 
 use common\models\offers\Exception\EqualsPaymentAccount;
-use common\models\offers\Exception\LowBalanceOfferException;
+use common\models\user\billing\Exception\LowBalanceException;
 use common\models\offers\Exception\OfferSaveException;
 use common\models\transaction\Transaction;
 use common\models\transaction\TransactionDictionary;
@@ -79,7 +79,7 @@ class OffersManager
 
     /**
      * @param int $paymentAccountId
-     * @throws LowBalanceOfferException
+     * @throws LowBalanceException
      * @throws EqualsPaymentAccount
      */
     public function closeOffer(int $paymentAccountId, int $userId)
@@ -118,7 +118,7 @@ class OffersManager
 
     /**
      * @param int $paymentAccountId
-     * @throws LowBalanceOfferException
+     * @throws LowBalanceException
      * @throws EqualsPaymentAccount
      */
     private function checkBuyer(int $paymentAccountId)
@@ -131,7 +131,7 @@ class OffersManager
                 $this->loadModel()->getToCurrencyId(),
                 $this->loadModel()->getToValue()
             )) {
-            throw new LowBalanceOfferException();
+            throw new LowBalanceException();
         }
     }
 

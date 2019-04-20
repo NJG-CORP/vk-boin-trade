@@ -68,6 +68,8 @@ class PaymentAccountBalanceManager
             ->setObjectId($objectId)
             ->setType($isPositive ? TransactionDictionary::TYPE_INCREASE : TransactionDictionary::TYPE_DECREASE)
             ->save();
+
+        return $transaction;
     }
 
     /**

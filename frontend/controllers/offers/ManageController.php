@@ -5,7 +5,7 @@ namespace frontend\controllers\offers;
 
 
 use common\models\offers\Exception\EqualsPaymentAccount;
-use common\models\offers\Exception\LowBalanceOfferException;
+use common\models\user\billing\Exception\LowBalanceException;
 use common\models\offers\OffersManager;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
@@ -23,7 +23,7 @@ class ManageController extends Controller
 
         try {
             (new OffersManager($offerId))->closeOffer(\Yii::$app->user->identity->paymentAccount->getId(), \Yii::$app->user->getId());
-        } catch (LowBalanceOfferException | EqualsPaymentAccount $e) {
+        } catch (LowBalanceException | EqualsPaymentAccount $e) {
             throw new ForbiddenHttpException();
         }
 

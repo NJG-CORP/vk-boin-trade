@@ -2,21 +2,19 @@
 
 namespace frontend\controllers\payment;
 
-use common\components\vk\Exception\CouldNotSaveException;
 use common\components\vk\Exception\TransactionAlreadyExistsException;
-use common\components\vk\VkCoinClient;
-use common\models\transaction\Transaction;
-use common\models\user\billing\Exception\CouldNotSavePaymentAccountBalanceException;
 use common\models\user\billing\Exception\CurrencyNotFound;
 use common\models\user\billing\Exception\WrongMerchantException;
 use common\models\user\billing\PaymentAccountManager;
 use common\models\user\Exception\UserNotFoundException;
-use yii\db\Exception;
+use Throwable;
+use Yii;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\Response as ResponseAlias;
 use yii\web\ServerErrorHttpException;
 
 class InController extends Controller
@@ -28,7 +26,7 @@ class InController extends Controller
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['index','check-transaction'],
+                        'actions' => ['index', 'check-transaction'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -42,18 +40,30 @@ class InController extends Controller
         return $this->render('index');
     }
 
+    /**
+     * @param string $tx
+     * @return ResponseAlias
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     * @throws ServerErrorHttpException
+     */
     public function actionCheckTransaction(string $tx)
     {
         try {
-            $response = (new PaymentAccountManager(\Yii::$app->user->getId()))->upBalanceFromTransaction($tx);
+            $transaction = PaymentAccountManager::upBalanceFromTransaction($tx);
+            if (!$transaction) {
+                throw new NotFoundHttpException('Транзакция не найндена');
+            }
+            Yii::$app->session->setFlash('success', 'Транзакция успешно обработана, Вам было начислено: ' . $transaction->getAmount() . ' VK Coin');
         } catch (UserNotFoundException | CurrencyNotFound $e) {
-            throw new NotFoundHttpException();
+            throw new NotFoundHttpException('Такой пользователь не зарегистрирован на сайте');
         } catch (WrongMerchantException | TransactionAlreadyExistsException $e) {
-            throw new BadRequestHttpException();
-        } catch (Exception $e) {
-            throw new ServerErrorHttpException();
+            throw new BadRequestHttpException('Транзакция уже авторизована');
+        } catch (Throwable $e) {
+            throw new ServerErrorHttpException('Ошибка!');
         }
 
-        dump($response);exit();
+
+        return $this->redirect(Yii::$app->request->getReferrer());
     }
 }
