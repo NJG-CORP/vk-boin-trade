@@ -2,6 +2,8 @@
 
 namespace common\models\transaction;
 
+use common\models\transaction\Query\TransactionQuery;
+use common\models\user\billing\Currency;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 
@@ -15,14 +17,27 @@ use yii\db\ActiveRecord;
  * @property int $date_updated [int(11)]
  * @property int $payment_account_id [int(11)]
  * @property int $object_id [int(10) unsigned]
+ * @property Currency $currency
  */
 class Transaction extends ActiveRecord
 {
-    public const
-        TYPE_INCREASE = 0,
-        TYPE_DECREASE = 1,
-        REASON_OFFER = 1,
-        REASON_EXTERNAL_OFFER = 0;
+    /**
+     * @return int
+     */
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    public static function find()
+    {
+        return new TransactionQuery(get_called_class());
+    }
+
+    public function isDecrease()
+    {
+        return $this->type === TransactionDictionary::TYPE_DECREASE;
+    }
 
     /**
      * @return int
@@ -143,4 +158,8 @@ class Transaction extends ActiveRecord
         return $this;
     }
 
+    public function getCurrency()
+    {
+        return $this->hasOne(Currency::class, ['id' => 'currency_id']);
+    }
 }

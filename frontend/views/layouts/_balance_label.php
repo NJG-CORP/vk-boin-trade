@@ -6,7 +6,7 @@
 $balances = $account->balances;
 $labels = [];
 foreach ($balances as $balance) {
-    $labels[] = $balance->currency->getLabel() . ': ' . $balance->getValue();
+    $labels[] = $balance->currency->getLabel() . ': ' . Yii::$app->formatter->asDecimal($balance->getValue());
 }
 
 ?>

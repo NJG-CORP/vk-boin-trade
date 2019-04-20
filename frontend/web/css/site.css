@@ -3,6 +3,11 @@ body {
     height: 100%;
 }
 
+nav#w1 {
+    background-color: #1D2939;
+    font-weight: 600;
+}
+
 .wrap {
     min-height: 100%;
     height: auto;

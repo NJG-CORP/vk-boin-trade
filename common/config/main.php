@@ -18,6 +18,11 @@ return [
             'thousandSeparator' => ' ',
             'nullDisplay' => '-',
             'currencyCode' => '₴'   // <-- ---- ----
+        ],
+        'vkCoinClient' => [
+            'class' => \common\components\vk\VkCoinClient::class,
+            'apikey' => '6Y8_KF,wSQ*[Sr;&F;.rBj-z*8mz[NxYgwNt,yBZ!.&;O5Ym[y',
+            'merchant_id' => 185036613
         ]
     ],
 ];

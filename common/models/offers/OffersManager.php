@@ -6,6 +6,7 @@ use common\models\offers\Exception\EqualsPaymentAccount;
 use common\models\offers\Exception\LowBalanceOfferException;
 use common\models\offers\Exception\OfferSaveException;
 use common\models\transaction\Transaction;
+use common\models\transaction\TransactionDictionary;
 use common\models\user\billing\Currency;
 use common\models\user\billing\PaymentAccountBalanceManager;
 use yii\data\ActiveDataProvider;
@@ -16,6 +17,40 @@ class OffersManager
     private
         $offerId,
         $offer;
+
+    public static function create(array $form, int $owner_id): Offers
+    {
+        $model = new Offers();
+
+        $model->load($form);
+
+        $model->setStatus(Offers::STATUS_NEW);
+        $model->setOwnerUserId($owner_id);
+
+        $transaction = \Yii::$app->db->beginTransaction();
+
+        if ($model->save()) {
+            try {
+                (new PaymentAccountBalanceManager($owner_id))
+                    ->changeBalance(
+                        $model->getFromCurrencyId(),
+                        $model->getFromValue(),
+                        false,
+                        TransactionDictionary::REASON_OFFER_CREATED,
+                        $model->getId()
+                    );
+
+                $transaction->commit();
+                $model->setToValue(0);
+                $model->setFromValue(0);
+
+            } catch (\Exception $exception) {
+                $transaction->rollBack();
+            }
+        }
+
+        return $model;
+    }
 
     public function __construct(int $offerId)
     {
@@ -38,7 +73,7 @@ class OffersManager
                 ->filterOnlyActive()
                 ->select(new Expression('SUM(to_value/from_value)/COUNT(*) as count'))
                 ->filterByCurrencyIds($from, $to)
-                ->scalar();
+                    ->scalar() ?? 0;
         }, 10);
     }
 
@@ -59,10 +94,10 @@ class OffersManager
         try {
             $owner->changeBalance($this->loadModel()->getToCurrencyId(),
                 $this->loadModel()->getToValue(), true,
-                Transaction::REASON_OFFER, $this->offerId);
+                TransactionDictionary::REASON_OFFER, $this->offerId);
 
-            $buyer->changeBalance($this->loadModel()->getToCurrencyId(), $this->loadModel()->getToValue(), false, Transaction::REASON_OFFER, $this->offerId);
-            $buyer->changeBalance($this->loadModel()->getFromCurrencyId(), $this->loadModel()->getFromValue(), true, Transaction::REASON_OFFER, $this->offerId);
+            $buyer->changeBalance($this->loadModel()->getToCurrencyId(), $this->loadModel()->getToValue(), false, TransactionDictionary::REASON_OFFER, $this->offerId);
+            $buyer->changeBalance($this->loadModel()->getFromCurrencyId(), $this->loadModel()->getFromValue(), true, TransactionDictionary::REASON_OFFER, $this->offerId);
 
             if (!$this->loadModel()
                 ->setStatus(Offers::STATUS_SUCCESS)

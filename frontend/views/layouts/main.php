@@ -31,20 +31,21 @@ AppAsset::register($this);
 <div class="wrap">
     <?php
     NavBar::begin([
-        'brandLabel' => Yii::$app->name,
+        'brandLabel' => 'VK Coin Trade',
         'brandUrl' => Yii::$app->homeUrl,
         'options' => [
             'class' => 'navbar-inverse navbar-fixed-top',
         ],
     ]);
     $menuItems = [
-        ['label' => 'Home', 'url' => ['/site/index']],
         ['label' => 'Купить коины', 'url' => ['/offers/main/index', 'from' => 1, 'to' => 2]],
         ['label' => 'Продать коины', 'url' => ['/offers/main/index', 'from' => 2, 'to' => 1]],
     ];
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => 'Login', 'url' => (new VkService())->getAuthUrl()];
     } else {
+        $menuItems[] = ['label' => 'Пополнить', 'url' => ['/payment/in/index']];
+        $menuItems[] = ['label' => 'Транзакции', 'url' => ['/transaction/main/index']];
         $menuItems[] = ['label' => Yii::$app->user->identity->getUsername() . ' ' . $this->render('_balance_label', [
                 'account' => Yii::$app->user->identity->paymentAccount
             ]), 'encode' => false];
@@ -72,14 +73,6 @@ AppAsset::register($this);
         <?= $content ?>
     </div>
 </div>
-
-<footer class="footer">
-    <div class="container">
-        <p class="pull-left">&copy; <?= Html::encode(Yii::$app->name) ?> <?= date('Y') ?></p>
-
-        <p class="pull-right"><?= Yii::powered() ?></p>
-    </div>
-</footer>
 
 <?php $this->endBody() ?>
 <script src="/js/main.js">

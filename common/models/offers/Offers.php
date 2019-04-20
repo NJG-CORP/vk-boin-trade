@@ -34,6 +34,22 @@ class Offers extends ActiveRecord
         return $this->id;
     }
 
+    public function rules()
+    {
+        return [
+            [['from_value', 'to_value'], 'number'],
+            [['from_currency_id', 'to_currency_id'], 'integer']
+        ];
+    }
+
+    public function attributeLabels()
+    {
+        return [
+            'from_value' => 'Я предлагаю',
+            'to_value' => 'Я хочу'
+        ];
+    }
+
     /**
      * @return int
      */

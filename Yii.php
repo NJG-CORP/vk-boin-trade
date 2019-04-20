@@ -26,6 +26,7 @@ abstract class BaseApplication extends yii\base\Application
  * Include only Web application related components here
  *
  * @property \common\components\web\User $user
+ * @property \common\components\vk\VkCoinClient $vkCoinClient
  */
 class WebApplication extends yii\web\Application
 {

@@ -1,5 +1,6 @@
 <?php
 /**
+ * @var \yii\web\View $this
  * @var \common\models\offers\OffersProvider $provider
  * @var string $mediumPrice
  * @var \yii\db\ActiveRecord $searchModel
@@ -7,11 +8,20 @@
 
 $model = $provider->getModels()[0];
 /** @var \common\models\offers\Offers $model */
-$mediumLabel = 'Цена за 1 ' . $model->fromCurrency->getLabel() . '(' . $model->toCurrency->getLabel() . ')';
-$fromLabel = $model->fromCurrency->getLabel();
-$toLabel = $model->toCurrency->getLabel();
+$mediumLabel = 'Цена';
+?>
+
+<a class="btn btn-success" data-toggle="collapse" href="#collapseForm">
+    Поменять <?= $fromLabel ?> на <?= $toLabel ?>
+</a>
+<?php
 
 try {
+    echo $this->render('_form', [
+        'toCurrencyId' => $toCurrencyId,
+        'fromCurrencyId' => $fromCurrencyId,
+        'model' => null
+    ]);
     echo \yii\grid\GridView::widget([
         'dataProvider' => $provider,
         'rowOptions' => function ($model) {
@@ -70,7 +80,7 @@ try {
                         '/offers/manage/buy',
                         'offerId' => $model->getId()
                     ], [
-                        'class' => 'ajax-send confirm-first',
+                        'class' => 'ajax-send confirm-first' . (Yii::$app->user->isGuest ? ' need-auth' : ''),
                         'data-offer-id' => $model->getId(),
                         'data-method' => 'POST'
                     ]);
@@ -82,4 +92,3 @@ try {
     echo 'Error';
     echo $e->getMessage();
 }
-?>

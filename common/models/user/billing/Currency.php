@@ -11,6 +11,9 @@ use yii\db\ActiveRecord;
  */
 class Currency extends ActiveRecord
 {
+    public const
+        CURRENCY_VK_COIN    = 1,
+        CURRENCY_VK_PAY     = 2;
 
     public static function find()
     {

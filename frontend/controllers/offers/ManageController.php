@@ -29,4 +29,18 @@ class ManageController extends Controller
 
         return 1;
     }
+
+    public function actionCreate()
+    {
+        $model = OffersManager::create(
+            \Yii::$app->request->getBodyParams(),
+            \Yii::$app->user->getId()
+        );
+
+        return $this->render('../main/_form', [
+            'fromCurrencyId' => $model->getFromCurrencyId(),
+            'toCurrencyId' => $model->getToCurrencyId(),
+            'model' => $model
+        ]);
+    }
 }

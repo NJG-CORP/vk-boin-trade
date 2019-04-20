@@ -10,4 +10,16 @@ return [
         'route' => 'offers/main/index',
         'defaults' => ['from' => 2, 'to' => 1],
     ],
+    [
+        'pattern' => 'create-offer',
+        'route' => 'offers/manage/create',
+    ],
+    [
+        'pattern' => 'transactions',
+        'route' => 'transaction/main/index',
+    ],
+    [
+        'pattern' => 'payment-in',
+        'route' => 'payment/in/index',
+    ],
 ];

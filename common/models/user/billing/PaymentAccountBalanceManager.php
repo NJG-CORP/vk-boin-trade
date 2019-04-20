@@ -5,6 +5,7 @@ namespace common\models\user\billing;
 
 
 use common\models\transaction\Transaction;
+use common\models\transaction\TransactionDictionary;
 use common\models\user\billing\Exception\CouldNotSavePaymentAccountBalanceException;
 use common\models\user\billing\Exception\CurrencyNotFound;
 
@@ -18,6 +19,15 @@ class PaymentAccountBalanceManager
     public function __construct(int $paymentAccountId)
     {
         $this->paymentAccountId = $paymentAccountId;
+    }
+
+    public function getBalance($currencyId)
+    {
+        return PaymentAccountBalance::find()
+            ->select('value')
+            ->filterByPaymentAccountId($this->paymentAccountId)
+            ->filterByCurrencyId($currencyId)
+            ->scalar();
     }
 
     public function checkAmount(int $currencyId, string $value): bool
@@ -56,7 +66,7 @@ class PaymentAccountBalanceManager
             ->setPaymentAccountId($this->paymentAccountId)
             ->setReason($reason)
             ->setObjectId($objectId)
-            ->setType($isPositive ? Transaction::TYPE_INCREASE : Transaction::TYPE_DECREASE)
+            ->setType($isPositive ? TransactionDictionary::TYPE_INCREASE : TransactionDictionary::TYPE_DECREASE)
             ->save();
     }
 
